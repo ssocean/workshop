@@ -1,10 +1,11 @@
+
 import glob
 import logging
 import os
 import time
 from os.path import splitext
 
-
+#GITHUB SYN
 def auto_make_directory(dir_pth: str):
     '''
     自动检查dir_pth是否存在，若存在，返回真，若不存在创建该路径，并返回假
@@ -40,7 +41,8 @@ def init_logger(out_pth:str='logs'):
     logger.addHandler(handler)
     logger.addHandler(console)
     '''
-    logger = init_logger(r'r')
+    使用方法：复制一下代码至主程序中
+    logger = init_logger(r'在此输入log日志文件输出路径')
     logger.info("Start print log") #一般信息
     logger.debug("Do something") #调试显示
     logger.warning("Something maybe fail.")#警告
@@ -51,7 +53,7 @@ def init_logger(out_pth:str='logs'):
 
 def get_files_pth(dir_pth: str, suffix: str = '*'):
     '''
-    返回dir_pth下以后缀名suffix结尾的文件绝对路径list
+    返回dir_pth下以后缀名suffix结尾的文件绝对路径list，默认为全部文件
     :param dir_pth:文件夹路径
     :param suffix:限定的文件后缀
     :return: 文件绝对路径list
@@ -80,7 +82,7 @@ def get_files_name(dir_path: str, suffix: str = '*'):
 
 def get_filename_from_pth(file_pth: str):
     '''
-    根据文件路径获取文件名
+    根据文件路径获取文件名，已修复多个.引起的bug
     :param file_pth:文件路径
     :return:文件名
     '''
