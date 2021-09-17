@@ -48,6 +48,27 @@ def init_logger(out_pth:str='logs'):
     '''
     return logger
 
+def get_dirs_pth(dir_pth: str):
+    '''
+    返回返回dir_pth下文件夹路径
+    :param dir_pth:
+    :return: 文件夹绝对路径list
+    '''
+    rst = []
+    for item in os.listdir(dir_pth):
+        temp = os.path.join(dir_pth,item)
+        if os.path.isdir(temp):
+            rst.append(str(temp))
+    return rst
+
+def get_dirs_name(dir_pth: str):
+    rst = []
+    for item in os.listdir(dir_pth):
+        temp = os.path.join(dir_pth,item)
+        if os.path.isdir(temp):
+            rst.append(str(item))
+    return rst
+
 
 def get_files_pth(dir_pth: str, suffix: str = '*'):
     '''
@@ -78,7 +99,7 @@ def get_files_name(dir_path: str, suffix: str = '*'):
         return ids
 
 
-def get_filename_from_pth(file_pth: str):
+def get_filename_from_pth(file_pth: str, suffix: bool=True):
     '''
     根据文件路径获取文件名
     :param file_pth:文件路径
@@ -96,3 +117,4 @@ def get_suffix_from_pth(file_pth: str):
     :return:后缀
     '''
     return os.path.split(file_pth)[1].split('.')[1]
+
