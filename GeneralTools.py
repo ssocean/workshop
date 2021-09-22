@@ -18,7 +18,7 @@ def auto_make_directory(dir_pth: str):
         return False
 
 
-def init_logger(out_pth:str='logs'):
+def init_logger(out_pth: str = 'logs'):
     '''
     初始化日志类
     :param out_pth: 输出路径，默认为调用文件的同级目录logs
@@ -48,6 +48,7 @@ def init_logger(out_pth:str='logs'):
     '''
     return logger
 
+
 def get_dirs_pth(dir_pth: str):
     '''
     返回返回dir_pth下文件夹路径
@@ -56,15 +57,16 @@ def get_dirs_pth(dir_pth: str):
     '''
     rst = []
     for item in os.listdir(dir_pth):
-        temp = os.path.join(dir_pth,item)
+        temp = os.path.join(dir_pth, item)
         if os.path.isdir(temp):
             rst.append(str(temp))
     return rst
 
+
 def get_dirs_name(dir_pth: str):
     rst = []
     for item in os.listdir(dir_pth):
-        temp = os.path.join(dir_pth,item)
+        temp = os.path.join(dir_pth, item)
         if os.path.isdir(temp):
             rst.append(str(item))
     return rst
@@ -84,6 +86,25 @@ def get_files_pth(dir_pth: str, suffix: str = '*'):
     return rst
 
 
+def get_all_files_pth(dir_pth: str, suffix: str = None):
+    '''
+    获取指定文件夹下（含子目录）以指定后缀结尾的文件路径列表
+    :param dir_pth: 指定文件夹路径
+    :param suffix: 指定后缀
+    :return:
+    '''
+    rst = []
+    for root, dirs, files in os.walk(dir_pth):
+        if len(files) > 0:
+            for file_name in files:
+                file_pth = os.path.join(root, file_name)
+                if not suffix:
+                    rst.append(file_pth)
+                elif file_pth.endswith(f'.{suffix}'):
+                    rst.append(file_pth)
+    return rst
+
+
 def get_files_name(dir_path: str, suffix: str = '*'):
     '''
     返回指定文件夹内的文件名（不带后缀）列表
@@ -99,7 +120,7 @@ def get_files_name(dir_path: str, suffix: str = '*'):
         return ids
 
 
-def get_filename_from_pth(file_pth: str, suffix: bool=True):
+def get_filename_from_pth(file_pth: str, suffix: bool = True):
     '''
     根据文件路径获取文件名
     :param file_pth:文件路径
@@ -117,4 +138,3 @@ def get_suffix_from_pth(file_pth: str):
     :return:后缀
     '''
     return os.path.split(file_pth)[1].split('.')[1]
-

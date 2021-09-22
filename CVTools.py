@@ -14,6 +14,8 @@ from labelme.logger import logger
 from labelme import utils
 from workshop.GeneralTools import *
 
+from GeneralTools import auto_make_directory, get_dirs_pth, get_dirs_name
+
 
 def otsu_bin(img: np.ndarray):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -95,4 +97,4 @@ def labelme_to_dataset(dir,output_dir):
         # showim(img)
     pass
 
-labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
+# labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
