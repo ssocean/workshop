@@ -12,9 +12,8 @@ import PIL.Image
 
 from labelme.logger import logger
 from labelme import utils
-from workshop.GeneralTools import *
 
-from GeneralTools import auto_make_directory, get_dirs_pth, get_dirs_name
+from GeneralTools.FileOperator import auto_make_directory, get_dirs_pth, get_dirs_name
 
 
 def otsu_bin(img: np.ndarray):
