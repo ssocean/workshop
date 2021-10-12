@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from os.path import splitext
-
+from tqdm import tqdm
 
 def auto_make_directory(dir_pth: str):
     '''
@@ -137,4 +137,58 @@ def get_suffix_from_pth(file_pth: str):
     :param file_pth:文件路径
     :return:后缀
     '''
-    return os.path.split(file_pth)[1].split('.')[1]
+    return os.path.split(file_pth)[1].split('.')[-1]
+
+
+import os, re
+
+
+def remove_strip(dir):
+    '''
+    去除指定路径dir下文件名中的空格
+    :param dir:
+    :return:
+    '''
+    files = get_files_pth(dir)
+    for pth in tqdm(files):
+        os.rename(pth, pth.replace(' ', ''))
+# remove_strip(r'C:\Users\Ocean\Downloads\a\result-img')
+
+def purge(dir, pattern):
+    '''
+    根据正则表达式规则pattern清洗dir下文件
+    :param dir:
+    :param pattern:
+    :return:
+    '''
+    for f in os.listdir(dir):
+        if re.search(pattern, f):
+            os.remove(os.path.join(dir, f))
+
+
+def prune_dir(dir_a, dir_b):
+    '''
+    对dir_a，dir_b中的文件清晰，忽略后缀名，仅保留两个文件夹共有的文件
+    :param dir_a:
+    :param dir_b:
+    :return:
+    '''
+    a_fnames = get_files_name(dir_a)
+    b_fnames = get_files_name(dir_b)
+    a_set = set(a_fnames)
+    b_set = set(b_fnames)
+    diff = list(a_set.symmetric_difference(b_set))
+    if len(a_set) < len(b_set):  # a为基准 删除b
+        del_dir = dir_b
+    else:
+        del_dir = dir_a
+    for del_fname in diff:
+        cur_fpth = os.path.join(del_dir, del_fname)
+        cur_fpth = glob.iglob(cur_fpth + '.*')
+        for i in cur_fpth:
+            print(f'删除{i}')
+            os.remove(i)
+    print(f'共删除{len(diff)}个样本')
+
+
+prune_dir(r'C:\Users\Ocean\Downloads\a\result-img', r'C:\Users\Ocean\Downloads\a\img')
