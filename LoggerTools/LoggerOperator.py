@@ -37,3 +37,10 @@ def init_logger(out_pth: str = 'logs'):
     logger.info("Finish")
     '''
     return logger
+
+def logger_to_excel():
+    '''
+    将符合格式的logger文件转为excel
+    :return:
+    '''
+    pass
