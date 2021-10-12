@@ -64,13 +64,13 @@ def overlapping_seg(img_path: str, rstdir_pth: str, patch_h: int = 256, patch_w:
     return n_patches
 
 
-def showim(img:np.ndarray):
+def showim(img:np.ndarray,img_name:str='image'):
     '''
     展示图片
     :param img: ndarray格式的图片
     '''
-    cv2.namedWindow(f'image', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow(f'image', img)
+    cv2.namedWindow(img_name, cv2.WINDOW_AUTOSIZE)
+    cv2.imshow(img_name, img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 

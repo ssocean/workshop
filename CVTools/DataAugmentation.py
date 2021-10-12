@@ -6,18 +6,9 @@ from tqdm import tqdm
 import numpy as np
 import cv2
 
+from CVTools.CVTools import showim
 from GeneralTools.FileOperator import auto_make_directory, get_files_pth
 
-
-def showim(img):
-    '''
-    展示图片
-    :param img: ndarray格式的图片
-    '''
-    cv2.namedWindow(f'img', cv2.WINDOW_AUTOSIZE)
-    cv2.imshow(f'img', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
 
 
 def stain(img, dirt_num=3):
