@@ -125,9 +125,17 @@ def append_suffix(dir,suffix:str):
     files = get_files_pth(dir)
     for pth in tqdm(files):
         os.rename(pth,splitext(pth)[0]+suffix+splitext(pth)[1])
+
+def rename_pathes(dir):
+    files = get_files_pth(dir)
+    for pth in tqdm(files):
+        new_pth = pth.replace('芯片隐裂','crack')
+        print(new_pth)
+        os.rename(pth,new_pth)
+# rename_pathes(r'D:\hongpu\数据集\crack\原图')
 # append_suffix(r'C:\Users\Ocean\Desktop\panel\bbp_mask',r'_0')
-s = r'LRP9041062106009001130_1.png'
-print(splitext(s)[0].split('_')[-1])
+# s = r'LRP9041062106009001130_1.png'
+# print(splitext(s)[0].split('_')[-1])
 def purge(dir, pattern):
     '''
     根据正则表达式规则pattern清洗dir下文件，文件名不符合pattern的文件将被删除
