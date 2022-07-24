@@ -44,3 +44,18 @@ def logger_to_excel():
     :return:
     '''
     pass
+
+def init_tensorboard(out_pth: str = 'logs'):
+    auto_make_directory(out_pth)
+    writer = SummaryWriter(log_dir=tb_dir)
+    ''' 
+    https://pytorch.org/docs/stable/tensorboard.html
+    writer.
+    add_scalar(tag, scalar_value, global_step=None, walltime=None, new_style=False, double_precision=False)
+    add_scalars(main_tag, tag_scalar_dict, global_step=None, walltime=None)
+    add_image(tag, img_tensor, global_step=None, walltime=None, dataformats='CHW')
+    add_images(tag, img_tensor, global_step=None, walltime=None, dataformats='NCHW')
+    '''
+
+    #  writer.close()  需在最后关闭
+    return writer
