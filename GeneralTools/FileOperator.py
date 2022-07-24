@@ -109,20 +109,36 @@ def get_suffix_from_pth(file_pth: str):
 import os, re
 
 
-def remove_strip(dir):
+def remove_strip(dir,sign:str=' '):
     '''
-    去除指定路径dir下文件名中的空格
+    去除指定路径dir下文件名中的空格，也可以去除其它字符、符号
     :param dir:
     :return:
     '''
     files = get_files_pth(dir)
     for pth in tqdm(files):
-        os.rename(pth, pth.replace(' ', ''))
-# remove_strip(r'C:\Users\Ocean\Downloads\a\result-img')
+        os.rename(pth, pth.replace(sign, ''))
 
+# remove_strip(r'C:\Users\Ocean\Desktop\panel\mask','_')
+# print(splitext(r'C:\Users\Ocean\Desktop\panel\mask\a.png'))
+def append_suffix(dir,suffix:str):
+    files = get_files_pth(dir)
+    for pth in tqdm(files):
+        os.rename(pth,splitext(pth)[0]+suffix+splitext(pth)[1])
+
+def rename_pathes(dir):
+    files = get_files_pth(dir)
+    for pth in tqdm(files):
+        new_pth = pth.replace('芯片隐裂','crack')
+        print(new_pth)
+        os.rename(pth,new_pth)
+# rename_pathes(r'D:\hongpu\数据集\crack\原图')
+# append_suffix(r'C:\Users\Ocean\Desktop\panel\bbp_mask',r'_0')
+# s = r'LRP9041062106009001130_1.png'
+# print(splitext(s)[0].split('_')[-1])
 def purge(dir, pattern):
     '''
-    根据正则表达式规则pattern清洗dir下文件
+    根据正则表达式规则pattern清洗dir下文件，文件名不符合pattern的文件将被删除
     :param dir:
     :param pattern:
     :return:
@@ -132,7 +148,7 @@ def purge(dir, pattern):
             os.remove(os.path.join(dir, f))
 
 
-def prune_dir(dir_a, dir_b):
+def get_common_file_in_dir(dir_a, dir_b):
     '''
     对dir_a，dir_b中的文件清晰，忽略后缀名，仅保留两个文件夹共有的文件
     :param dir_a:
@@ -155,3 +171,5 @@ def prune_dir(dir_a, dir_b):
             print(f'删除{i}')
             os.remove(i)
     print(f'共删除{len(diff)}个样本')
+
+# get_common_file_in_dir(r'C:\Users\Ocean\Desktop\panel\bp_mask',r'C:\Users\Ocean\Desktop\panel\bp_img')
