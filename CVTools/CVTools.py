@@ -7,10 +7,10 @@ import os
 import sys
 import os
 
-from GeneralTools.FileOperator import auto_make_directory, get_dirs_name, get_dirs_pth
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-
+from GeneralTools.FileOperator import auto_make_directory, get_dirs_name, get_dirs_pth
 def otsu_bin(img: np.ndarray):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, res = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)

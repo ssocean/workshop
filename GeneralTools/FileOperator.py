@@ -97,7 +97,11 @@ def get_filename_from_pth(file_pth: str, suffix: bool = True):
     :return:文件名
     '''
     fname_list = os.path.split(file_pth)[1].split('.')
-    rst = '.'.join(fname_list)
+    if suffix: #如果保留后缀
+        
+        rst = '.'.join(fname_list)
+    else:#如果不保留后缀
+        rst = '.'.join(fname_list[:-1])
     return rst
 
 
