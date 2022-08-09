@@ -40,7 +40,19 @@ def get_dirs_name(dir_pth: str):
         if os.path.isdir(temp):
             rst.append(str(item))
     return rst
-
+def get_filename_from_pth(file_pth: str, suffix: bool = True):
+    '''
+    根据文件路径获取文件名
+    :param file_pth:文件路径
+    :return:文件名
+    '''
+    fname_list = os.path.split(file_pth)[1].split('.')
+    if suffix: #如果保留后缀
+        
+        rst = '.'.join(fname_list)
+    else:#如果不保留后缀
+        rst = '.'.join(fname_list[:-1])
+    return rst
 
 def get_files_pth(dir_pth: str, suffix: str = '*'):
     '''
