@@ -4,7 +4,10 @@ import os
 import time
 from os.path import splitext
 from tqdm import tqdm
-
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from GeneralTools.FileOperator import auto_make_directory
 
 

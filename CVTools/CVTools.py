@@ -1,20 +1,13 @@
+from operator import truediv
 import cv2
 import numpy as np
-
-import argparse
-import base64
-import json
 import os
-import os.path as osp
-
-import imgviz
-import PIL.Image
-
 from labelme.logger import logger
-from labelme import utils
-
-from GeneralTools.FileOperator import auto_make_directory, get_dirs_pth, get_dirs_name
-
+import os
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 def otsu_bin(img: np.ndarray):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -123,4 +116,15 @@ def cal_mean_std(images_dir,is_normalized=False):
     print('std:  ',std)
     return {'mean':mean,'std':std}
 
-# labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
+def is_color(img):
+    if isinstance(img,str):
+        img = cv2.imread(img)
+    b,g,r = cv2.split(img)
+    if np.sum(b) == np.sum(g) == np.sum(r):
+        return True
+    return False
+
+# a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
+
+# print(a)
+# # labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')

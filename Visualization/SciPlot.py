@@ -3,7 +3,10 @@ import os
 
 import cv2
 import numpy as np
-
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from CVTools.CVTools import showim, otsu_bin
 
 

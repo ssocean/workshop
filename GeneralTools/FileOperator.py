@@ -4,6 +4,10 @@ import os
 import time
 from os.path import splitext
 from tqdm import tqdm
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 def auto_make_directory(dir_pth: str):
     '''
     自动检查dir_pth是否存在，若存在，返回真，若不存在创建该路径，并返回假

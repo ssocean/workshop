@@ -10,7 +10,10 @@ import imgviz
 import PIL.Image
 from labelme.logger import logger
 from labelme import utils
-
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from CVTools.CVTools import otsu_bin
 from GeneralTools.FileOperator import get_dirs_pth, get_dirs_name, auto_make_directory
 

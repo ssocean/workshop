@@ -1,6 +1,9 @@
 import numpy as np
 from torch import Tensor
-
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 
 def tensor_to_ndarray(t:Tensor):
     cpu_tensor = t.cpu()

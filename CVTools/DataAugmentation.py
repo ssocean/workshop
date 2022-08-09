@@ -5,7 +5,10 @@ from os.path import splitext
 from tqdm import tqdm
 import numpy as np
 import cv2
-
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from CVTools.CVTools import showim
 from GeneralTools.FileOperator import auto_make_directory, get_files_pth
 
