@@ -6,6 +6,8 @@ from labelme.logger import logger
 import os
 import sys
 import os
+
+from GeneralTools.FileOperator import auto_make_directory, get_dirs_name, get_dirs_pth
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
