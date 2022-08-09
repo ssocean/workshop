@@ -48,7 +48,7 @@ def get_filename_from_pth(file_pth: str, suffix: bool = True):
     '''
     fname_list = os.path.split(file_pth)[1].split('.')
     if suffix: #如果保留后缀
-        
+
         rst = '.'.join(fname_list)
     else:#如果不保留后缀
         rst = '.'.join(fname_list[:-1])
@@ -68,6 +68,20 @@ def get_files_pth(dir_pth: str, suffix: str = '*'):
     return rst
 
 
+import csv
+def write_csv(rst: list, file_pth: str, overwrite=False):
+    '''
+    :param rst:形如[(obj1.parm1,obj1.parm2),...,(objn.parm1,objn.parm2)]的列表
+    :param file_pth:输出csv的路径
+    :return:
+    '''
+    mode = 'w+' if overwrite else 'a+'
+    file = open(file_pth, mode, encoding='utf-8', newline='')
+
+    csv_writer = csv.writer(file)
+    #插入标题栏 否则报4000行错误
+    csv_writer.writerows(rst)
+    file.close()
 def get_all_files_pth(dir_pth: str, suffix: str = None):
     '''
     获取指定文件夹下（含子目录）以指定后缀结尾的文件路径列表
@@ -110,7 +124,7 @@ def get_filename_from_pth(file_pth: str, suffix: bool = True):
     '''
     fname_list = os.path.split(file_pth)[1].split('.')
     if suffix: #如果保留后缀
-        
+
         rst = '.'.join(fname_list)
     else:#如果不保留后缀
         rst = '.'.join(fname_list[:-1])

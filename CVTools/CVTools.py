@@ -123,8 +123,8 @@ def is_color(img):
         img = cv2.imread(img)
     b,g,r = cv2.split(img)
     if np.sum(b) == np.sum(g) == np.sum(r):
-        return True
-    return False
+        return False
+    return True
 
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
 
