@@ -6,6 +6,7 @@ from os.path import splitext
 from tqdm import tqdm
 import sys
 import os
+from torch.utils.tensorboard import SummaryWriter
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from GeneralTools.FileOperator import auto_make_directory
@@ -48,10 +49,12 @@ def logger_to_excel():
     '''
     pass
 
-def init_tensorboard(out_pth: str = 'logs'):
-    auto_make_directory(out_pth)
-    writer = SummaryWriter(log_dir=tb_dir)
-    ''' 
+def init_tensorboard(out_dir: str = 'logs'):
+    if not os.path.exists(out_dir):  ##目录存在，返回为真
+        os.makedirs(out_dir)
+
+    writer = SummaryWriter(log_dir=out_dir)
+    '''
     https://pytorch.org/docs/stable/tensorboard.html
     writer.
     add_scalar(tag, scalar_value, global_step=None, walltime=None, new_style=False, double_precision=False)
