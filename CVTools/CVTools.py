@@ -1,4 +1,5 @@
-from operator import truediv
+import imp
+from operator import le, truediv
 import cv2
 import numpy as np
 import os
@@ -6,7 +7,7 @@ from labelme.logger import logger
 import os
 import sys
 import os
-
+from tqdm import tqdm
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -59,37 +60,29 @@ def overlapping_seg(img_path: str, rstdir_pth: str, patch_h: int = 256, patch_w:
     return n_patches
 
 
-def showim(img:np.ndarray,img_name:str='image'):
+def showim(img:np.ndarray,img_name:str='image',is_fixed=True):
     '''
     展示图片
     :param img: ndarray格式的图片
     '''
-    cv2.namedWindow(img_name, cv2.WINDOW_AUTOSIZE)
+    if is_fixed:
+        cv2.namedWindow(img_name, cv2.WINDOW_AUTOSIZE)
+    else:
+        cv2.namedWindow(img_name, cv2.WINDOW_NORMAL)
     cv2.imshow(img_name, img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-def labelme_to_dataset(dir,output_dir):
-    '''
-    预先准备
-    1. 将json文件全部考入一个文件夹内
-    2. 装有labelme环境的prompt cd指令进入该文件夹 输入
-       for /r %i in (*) do labelme_json_to_dataset %i
-       注意观察文件数量，该命令不会自行终止
-
-    '''
-    auto_make_directory(output_dir)
-    dir_list = get_dirs_pth(dir)
-    dir_name_list = get_dirs_name(dir)
-    assert len(dir_list)==len(dir_name_list), "长度不一致"
-    for i in range(len(dir_list)):
-        img = cv2.imread(os.path.join(dir_list[i],'label.png'),1)#彩色读图片
-
-        img = otsu_bin(img)
-        img_name = dir_name_list[i].replace('_json','')+'.png'
-        cv2.imwrite(os.path.join(output_dir,img_name),img)
-        # showim(img)
-    pass
+def get_cnt_corner(cnt):
+    leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
+    rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
+    topmost = tuple(cnt[cnt[:,:,1].argmin()][0])
+    bottommost = tuple(cnt[cnt[:,:,1].argmax()][0])
+    return {'leftmost':leftmost,
+            'rightmost':rightmost,
+            'topmost':topmost,
+            'bottommost':bottommost}
+    
 
 def cal_mean_std(images_dir,is_normalized=False):
     """
@@ -119,13 +112,77 @@ def cal_mean_std(images_dir,is_normalized=False):
     return {'mean':mean,'std':std}
 
 def is_color(img):
-    if isinstance(img,str):
+    '''_summary_
+    判断img是否为彩色图像
+    Args:
+        img (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    '''
+    if isinstance(img, str):
         img = cv2.imread(img)
-    b,g,r = cv2.split(img)
+    elif isinstance(img, np.ndarray):
+        pass
+    b, g, r = cv2.split(img)
     if np.sum(b) == np.sum(g) == np.sum(r):
+        # hist = cv2.calcHist([img],[0],None,[16],[0,256])
+        # print(hist)
         return False
     return True
+def is_bin_bg_white(img):
+    '''_summary_
+    判断二值图背景是否为白色
+    Args:
+        img (_type_): _description_
 
+    Returns:
+        _type_: _description_
+    '''
+    if isinstance(img, str):
+        img = cv2.imread(img)
+    elif isinstance(img, np.ndarray):
+        pass
+    h,w,c = img.shape[:2]
+    if c!=1:
+        img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    # _, img = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    max_val = h*w*255
+    current_val = np.sum(img)
+    ratio = current_val/max_val
+    
+    if ratio > 0.5:
+        return True
+    return False
+def find_cnt_center(cnt):
+    '''_summary_
+    计算轮廓cnt的中心坐标
+    Args:
+        cnt (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    '''
+    M = cv2.moments(cnt) #计算矩特征
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    return (cX,cY)
+def extract_roi_by_cnt(img_ori,point):
+    img = img_ori.copy()
+    poly = np.array(point).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    # 定义四个顶点坐标
+    pts = pts.reshape((-1, 1, 2))
+    x, y, w, h = cv2.boundingRect(pts)  #轮廓
+
+    # 画多边形 生成mask
+    mask = np.zeros(img.shape, np.uint8)
+    mask2 = cv2.fillPoly(mask.copy(), [pts],
+                            (255, 255, 255))  # 用于求 ROI
+    ROI = cv2.bitwise_and(mask2, img)[y:y + h, x:x + w]
+    return ROI
+
+# is_bin_bg_white(r'F:\Data\GJJS-dataset\dataset\train\image-bin\image_21.jpg')
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
 
 # print(a)

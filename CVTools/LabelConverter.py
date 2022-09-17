@@ -151,8 +151,32 @@ def main():
         # print(os.path.join(final_output, img_name))
         ret = cv2.imwrite(os.path.join(final_output, img_name), img)
         assert ret, '图片保存失败'
+def labelme_to_dataset(dir,output_dir):
+    '''
+    预先准备
+    1. 将json文件全部考入一个文件夹内
+    2. 装有labelme环境的prompt cd指令进入该文件夹 输入
+       for /r %i in (*) do labelme_json_to_dataset %i
+       注意观察文件数量，该命令不会自行终止
 
+    '''
+    auto_make_directory(output_dir)
+    dir_list = get_dirs_pth(dir)
+    dir_name_list = get_dirs_name(dir)
+    assert len(dir_list)==len(dir_name_list), "长度不一致"
+    for i in range(len(dir_list)):
+        img = cv2.imread(os.path.join(dir_list[i],'label.png'),1)#彩色读图片
 
+        img = otsu_bin(img)
+        img_name = dir_name_list[i].replace('_json','')+'.png'
+        cv2.imwrite(os.path.join(output_dir,img_name),img)
+        # showim(img)
+    pass
+def points_to_poly(points):
+    poly = np.array(points).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    return [poly.reshape((-1, 1, 2))]
+    
 if __name__ == "__main__":
     main()
 
