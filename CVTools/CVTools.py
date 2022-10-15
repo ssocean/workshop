@@ -181,7 +181,10 @@ def extract_roi_by_cnt(img_ori,point):
                             (255, 255, 255))  # 用于求 ROI
     ROI = cv2.bitwise_and(mask2, img)[y:y + h, x:x + w]
     return ROI
-
+def points_to_poly(points):
+    poly = np.array(points).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    return [poly.reshape((-1, 1, 2))]
 # is_bin_bg_white(r'F:\Data\GJJS-dataset\dataset\train\image-bin\image_21.jpg')
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
 
