@@ -86,7 +86,7 @@ def get_cnt_corner(cnt):
             'rightmost':rightmost,
             'topmost':topmost,
             'bottommost':bottommost}
-    
+
 
 def cal_mean_std(images_dir,is_normalized=False):
     """
@@ -154,7 +154,7 @@ def is_bin_bg_white(img):
     max_val = h*w*255
     current_val = np.sum(img)
     ratio = current_val/max_val
-    
+
     if ratio > 0.5:
         return True
     return False
@@ -181,7 +181,7 @@ def get_white_ratio_cuda(bbox:np.ndarray):
         bbox_gray = cv2.cvtColor(bbox,cv2.COLOR_BGR2GRAY)
     else:
         bbox_gray = bbox
-    
+
     _,bbox_bin = cv2.threshold(bbox_gray,1,255,cv2.THRESH_BINARY)
     bbox_tensor = ndarray_to_tensor(bbox_bin)
     # bbox_bin.astype(np.uint16)
@@ -254,7 +254,7 @@ def crop_by_hor_projection(hor_projection,threshold):
             break
     # print(f'{top,down}/{l}')
     return top,down
-    
+
 def getCorrect1(img):
     '''_summary_
     霍夫变换 要求输入图像为单通道图像
@@ -270,7 +270,7 @@ def getCorrect1(img):
     # src = ~src
     # showAndWaitKey("src",src)
     _,bin = cv2.threshold(src, 1, 255, cv2.THRESH_BINARY)
-    
+
 
     # showAndWaitKey("gray",gray)
     #腐蚀、膨胀
@@ -315,12 +315,12 @@ def getCorrect1(img):
 
     rotateImg = adapt_rotate(src,theta)
     # print(rotateImg.shape)
-    
+
     # showAndWaitKey("rotateImg",rotateImg)
     rotateImg = cv2.cvtColor(rotateImg,cv2.COLOR_BGR2GRAY)
     _,rotateImg_bin = cv2.threshold(rotateImg, 1, 255, cv2.THRESH_BINARY)
 
-    threshold,_ = rotateImg_bin.shape[:2]    
+    threshold,_ = rotateImg_bin.shape[:2]
     hor_proj = get_hor_projection(rotateImg_bin)
     top,down = crop_by_hor_projection(hor_proj,threshold//20)
     # showAndWaitKey('rst',rotateImg[top:down,:])
@@ -351,7 +351,7 @@ def getCorrect2(img):
         rst = np.zeros([h,w],dtype=np.uint8)
         img_gray = img
         _,img_bin = cv2.threshold(img_gray, 1, 255, cv2.THRESH_BINARY)
-    
+
     none_zero_index = (img_bin!=0).argmax(axis=0)
     for i,indent in enumerate(none_zero_index):
         if len(img.shape)==3:
@@ -365,7 +365,7 @@ def getCorrect2(img):
     _, deskew_bin_rst = cv2.threshold(deskew_gray_rst, 1, 255, cv2.THRESH_BINARY)
     # showim(deskew_rst)
     hor_proj = get_hor_projection(deskew_bin_rst)
-    threshold,_ = deskew_bin_rst.shape[:2]    
+    threshold,_ = deskew_bin_rst.shape[:2]
     top,down = crop_by_hor_projection(hor_proj,threshold//20)
     rst = rst[top:down,:]
     return rst
