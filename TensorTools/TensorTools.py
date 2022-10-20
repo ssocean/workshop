@@ -13,3 +13,8 @@ def tensor_to_ndarray(t:Tensor):
     # res = np.swapaxes(res, 0, 2)
     # res = np.swapaxes(res, 0, 1)
     return res
+def ndarray_to_tensor(ndarray:np.ndarray):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    t = torch.Tensor(ndarray)
+    t.to(device)
+    return t

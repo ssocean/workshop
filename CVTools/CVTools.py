@@ -1,4 +1,5 @@
 import imp
+import math
 from operator import le, truediv
 import cv2
 import numpy as np
@@ -9,11 +10,14 @@ import sys
 import os
 from tqdm import tqdm
 
+from TensorTools.TensorTools import ndarray_to_tensor
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from GeneralTools.FileOperator import auto_make_directory, get_dirs_name, get_dirs_pth
 def otsu_bin(img: np.ndarray):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if len(img.shape) == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, res = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return res
 
@@ -167,6 +171,26 @@ def find_cnt_center(cnt):
     cX = int(M["m10"] / M["m00"])
     cY = int(M["m01"] / M["m00"])
     return (cX,cY)
+def get_white_ratio_cuda(bbox:np.ndarray):
+    '''
+    输入图像应为单通道，cuda加速版本
+    针对黑底白字
+    '''
+    if len(bbox.shape)>2:
+        #三通道 转灰度图
+        bbox_gray = cv2.cvtColor(bbox,cv2.COLOR_BGR2GRAY)
+    else:
+        bbox_gray = bbox
+    
+    _,bbox_bin = cv2.threshold(bbox_gray,1,255,cv2.THRESH_BINARY)
+    bbox_tensor = ndarray_to_tensor(bbox_bin)
+    # bbox_bin.astype(np.uint16)
+    h,w = bbox_tensor.shape[:2]
+
+    bbox_tensor = bbox_tensor/255
+    # current_val = np.sum(bbox_bin)
+    ratio = bbox_tensor.sum()/(h*w) #
+    return ratio
 def extract_roi_by_cnt(img_ori,point):
     img = img_ori.copy()
     poly = np.array(point).astype(np.int32).reshape((-1))
@@ -177,13 +201,171 @@ def extract_roi_by_cnt(img_ori,point):
 
     # 画多边形 生成mask
     mask = np.zeros(img.shape, np.uint8)
-    mask2 = cv2.fillPoly(mask.copy(), [pts],
-                            (255, 255, 255))  # 用于求 ROI
+    mask2 = cv2.drawContours(mask2,pts,-1,255,thickness=-1)
     ROI = cv2.bitwise_and(mask2, img)[y:y + h, x:x + w]
     return ROI
-
+import imutils
+def adapt_rotate(image,angle):
+    # image = imutils.resize(image, width=300)
+    # 获取图像的维度，并计算中心
+    (h, w) = image.shape[:2]
+    (cX, cY) = (w // 2, h // 2)
+    # 顺时针旋转33度，并保证图像旋转后完整~,确保整个图都在视野范围
+    rotated = imutils.rotate_bound(image, angle)
+    # showAndWaitKey('rst',rotated)
+    return rotated
+def get_hor_projection(img_bin):
+    img_bin=img_bin
+    # showim(img_bin)
+    rst = np.sum(img_bin,axis=1)//255
+    return rst.tolist()
 # is_bin_bg_white(r'F:\Data\GJJS-dataset\dataset\train\image-bin\image_21.jpg')
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
 
 # print(a)
 # # labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
+def crop_by_hor_projection(hor_projection,threshold):
+    '''_summary_
+    根据投影信息返回两端第一次非零元素出现位置
+    Args:
+        hor_projection (_type_): _description_
+        threshold (_type_): _description_
+
+    Returns:
+        _type_: _description_ top / down
+    '''
+    l = len(hor_projection)
+    top = 0
+    down = l
+    is_top_clear = False
+    is_down_clear = False
+    # print(f'threshold is {threshold}')
+    # print(hor_projection[-5:])
+    #遍历两端
+    threshold = 0
+    for i in range(l):
+        if hor_projection[i]>threshold and not is_top_clear:
+            top = i
+            is_top_clear = True
+        if hor_projection[l-1-i]>threshold and not is_down_clear:
+            down = l-1-i
+            is_down_clear = True
+        if is_top_clear and is_down_clear:
+            break
+    # print(f'{top,down}/{l}')
+    return top,down
+    
+def getCorrect1(img):
+    '''_summary_
+    霍夫变换 要求输入图像为单通道图像
+    Args:
+        img (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    '''
+    #读取图片，灰度化
+    src = img
+    # print(src.shape)
+    # src = ~src
+    # showAndWaitKey("src",src)
+    _,bin = cv2.threshold(src, 1, 255, cv2.THRESH_BINARY)
+    
+
+    # showAndWaitKey("gray",gray)
+    #腐蚀、膨胀
+    # kernel = np.ones((5,5),np.uint8)
+    # erode_Img = cv2.erode(bin,kernel)
+    # eroDil = cv2.dilate(erode_Img,kernel)
+    # showAndWaitKey("eroDil",eroDil)
+    #边缘检测
+    canny = cv2.Canny(bin,50,150)
+    # showAndWaitKey("canny",canny)
+    #霍夫变换得到线条
+    lines = cv2.HoughLinesP(canny, 1, np.pi / 180, 40,minLineLength=20,maxLineGap=10)
+    # drawing = np.zeros(src.shape[:2], dtype=np.uint8)
+    #画出线条
+    # ks = []
+    # thetas = []
+    if lines is None:
+        return img
+    # print(lines.shape)
+    # lines.sort(key=dis_btn_points)
+    max_dis = 0
+    angle = 0
+    for line in lines:
+        # print(line)
+        x1, y1, x2, y2 = line[0]# [[line]]
+        r = pow(pow(x2-x1,2)+pow(y2-y1,2),0.5)
+        k = float(y1-y2)/(x1-x2)
+        theta = np.degrees(math.atan(k))
+        # ks.append(k)
+        # thetas.append(theta)
+        # cv2.line(drawing, (x1, y1), (x2, y2), 255, 1, lineType=cv2.LINE_AA)
+        if r>max_dis:
+            max_dis = r
+            angle = theta
+    # showim(drawing)
+    # print(thetas)
+    theta = -angle
+
+    # print(theta)
+    if theta == 0 or abs(theta)>60:
+        return img
+
+    rotateImg = adapt_rotate(src,theta)
+    # print(rotateImg.shape)
+    
+    # showAndWaitKey("rotateImg",rotateImg)
+    rotateImg = cv2.cvtColor(rotateImg,cv2.COLOR_BGR2GRAY)
+    _,rotateImg_bin = cv2.threshold(rotateImg, 1, 255, cv2.THRESH_BINARY)
+
+    threshold,_ = rotateImg_bin.shape[:2]    
+    hor_proj = get_hor_projection(rotateImg_bin)
+    top,down = crop_by_hor_projection(hor_proj,threshold//20)
+    # showAndWaitKey('rst',rotateImg[top:down,:])
+    return rotateImg [top:down,:]
+
+def get_first_non_zeros_2D_2(array_2D):
+    none_zero_index = (array_2D!=0).argmax(axis=1)
+    # first_non_zeros = np.array([array_2D[i,none_zero_index[i]] for i in range(array_2D.shape[0])])
+    first_non_zeros = array_2D[range(array_2D.shape[0]),none_zero_index]
+    return first_non_zeros
+
+def getCorrect2(img):
+    '''_summary_
+    基于轮廓的对齐，可用于矫正任意弯曲的图像
+    Args:
+        img (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    '''
+    h,w = img.shape[:2]
+    if len(img.shape)==3:
+        rst = np.zeros([h,w,3],dtype=np.uint8)
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        _,img_bin = cv2.threshold(img_gray, 1, 255, cv2.THRESH_BINARY)
+    else:
+        rst = np.zeros([h,w],dtype=np.uint8)
+        img_gray = img
+        _,img_bin = cv2.threshold(img_gray, 1, 255, cv2.THRESH_BINARY)
+    
+    none_zero_index = (img_bin!=0).argmax(axis=0)
+    for i,indent in enumerate(none_zero_index):
+        if len(img.shape)==3:
+            rst[:,i,:] = np.roll(img[:,i,:], -indent,axis=0)
+        else:
+            rst[:,i] = np.roll(img[:,i], -indent)
+    if len(img.shape)==3:
+        deskew_gray_rst = cv2.cvtColor(rst, cv2.COLOR_BGR2GRAY)
+    else:
+        deskew_gray_rst = rst
+    _, deskew_bin_rst = cv2.threshold(deskew_gray_rst, 1, 255, cv2.THRESH_BINARY)
+    # showim(deskew_rst)
+    hor_proj = get_hor_projection(deskew_bin_rst)
+    threshold,_ = deskew_bin_rst.shape[:2]    
+    top,down = crop_by_hor_projection(hor_proj,threshold//20)
+    rst = rst[top:down,:]
+    return rst
