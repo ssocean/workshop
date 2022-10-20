@@ -221,7 +221,10 @@ def get_hor_projection(img_bin):
     return rst.tolist()
 # is_bin_bg_white(r'F:\Data\GJJS-dataset\dataset\train\image-bin\image_21.jpg')
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
-
+def points_to_poly(points):
+    poly = np.array(points).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    return [poly.reshape((-1, 1, 2))]
 # print(a)
 # # labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
 def crop_by_hor_projection(hor_projection,threshold):
