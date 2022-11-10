@@ -172,19 +172,7 @@ def find_cnt_center(cnt):
     cY = int(M["m01"] / M["m00"])
     return (cX,cY)
 
-def extract_roi_by_cnt(img_ori,point):
-    img = img_ori.copy()
-    poly = np.array(point).astype(np.int32).reshape((-1))
-    poly = poly.reshape(-1, 2)
-    # 定义四个顶点坐标
-    pts = pts.reshape((-1, 1, 2))
-    x, y, w, h = cv2.boundingRect(pts)  #轮廓
 
-    # 画多边形 生成mask
-    mask = np.zeros(img.shape, np.uint8)
-    mask2 = cv2.drawContours(mask2,pts,-1,255,thickness=-1)
-    ROI = cv2.bitwise_and(mask2, img)[y:y + h, x:x + w]
-    return ROI
 import imutils
 def adapt_rotate(image,angle):
     # image = imutils.resize(image, width=300)
@@ -410,3 +398,29 @@ def resize_contour(cnts,ori_size,rst_shape):
         ratio_mat = [[width_ratio,0],[0,height_ratio]]
         # print(points_to_poly(cnts).shape)
         return (np.array(cnts).astype(np.int32).reshape((-1)).reshape((-1,  2))@ratio_mat).astype(np.int32) # n×2 矩阵乘 2×2
+def extract_roi_by_cnt(img_ori,point):
+    img = img_ori.copy()
+    point = point.copy()
+    poly = np.array(point).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    # 定义四个顶点坐标
+    pts = poly.reshape((-1, 1, 2))
+    x, y, w, h = cv2.boundingRect(pts)  #轮廓
+    inner_pts = pts - np.array([x,y])
+    # print(pts)
+    # 画多边形 生成mask
+    img_patch = img[y:y + h, x:x + w]
+    mask = np.zeros(img.shape, np.uint8)[y:y + h, x:x + w]
+    # mask2 = cv2.fillPoly(mask.copy(), [pts],
+    #                         (255, 255, 255))  # 用于求 ROI
+    mask2 = cv2.drawContours(mask.copy(), [inner_pts], -1, (255,255,255), thickness=-1)
+    ones = 2*np.ones(img_patch.shape,dtype=np.uint8)
+    img_patch = cv2.add(img_patch,ones)
+    ROI = cv2.bitwise_and(mask2, img_patch)
+    # ROI = cv2.bitwise_and(mask2, img)[y:y + h, x:x + w]
+    # if ROI is None:
+    #     print(x, y, w, h)
+    # showim(ROI)
+
+    ROI = cv2.rotate(ROI, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    return ROI

@@ -221,3 +221,25 @@ def overlapping_rec(img):
         return [img]
     
     return rst
+def merge_str(a:str,b:str,k=2):
+    if a != '':
+        key = b[1:1+k]
+        # print(key)
+        index = a.rfind(key) #,len(a)-k-1,len(a)
+        # 如果无法合并
+        if index == -1:
+            # print(f'unable to merge str, return the concat of {a} and {b}')
+            rst = a + b #对编辑距离来说 该操作效果更好
+        else:
+            rst = a[:index]+b[1:]
+        return rst
+    else:
+        return b
+def merge_strs(strs:list):
+    rst = ''
+    for i in strs:
+        rst = merge_str(rst,i)
+    # if len(strs)>1:
+    #     print(strs)
+    #     print(f'multiple str merge rst:{rst}')
+    return rst
