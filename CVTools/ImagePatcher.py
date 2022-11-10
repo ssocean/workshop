@@ -1,3 +1,4 @@
+import math
 import os
 from os import listdir
 from os.path import splitext
@@ -162,6 +163,7 @@ def overlapping_rec(img):
     :param img_name: 待切图片名称
     :return: [子图1,子图2,...,子图N]
     '''
+    H=64
     # print(f'ori input img shape:{img.shape}')
     h,w = img.shape[:2]
     # print(h,w,c)
