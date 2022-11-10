@@ -11,7 +11,7 @@ import os
 from tqdm import tqdm
 
 from TensorTools.TensorTools import ndarray_to_tensor
-
+from GeneralTools.FileOperator import *
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from GeneralTools.FileOperator import auto_make_directory, get_dirs_name, get_dirs_pth
@@ -372,3 +372,15 @@ def getCorrect2(img):
     top,down = crop_by_hor_projection(hor_proj,threshold//20)
     rst = rst[top:down,:]
     return rst
+from skimage import util
+from PIL import Image
+def dir_to_1bit_bin(dir,output_dir):
+    fpths = get_files_pth(dir)
+    for pth in tqdm(fpths):
+        bin = cv2.imread(pth, cv2.IMREAD_GRAYSCALE)
+        _, bin = cv2.threshold(bin, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        # bin = otsu_bin(bin)/255
+        bin = util.img_as_bool(bin)
+        img = Image.fromarray(bin)
+        new_name = get_filename_from_pth(pth, False)
+        img.save(os.path.join(output_dir, new_name+'.png'), bits=1, optimize=True)
