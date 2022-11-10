@@ -1,3 +1,4 @@
+import csv
 import glob
 import logging
 import os
@@ -59,9 +60,23 @@ def init_tensorboard(out_dir: str = 'logs'):
     writer.
     add_scalar(tag, scalar_value, global_step=None, walltime=None, new_style=False, double_precision=False)
     add_scalars(main_tag, tag_scalar_dict, global_step=None, walltime=None)
-    add_image(tag, img_tensor, global_step=None, walltime=None, dataformats='CHW')
+    add_image(tag, img_tensor, global_step=None, walltime=None, dataformats='HWC')
     add_images(tag, img_tensor, global_step=None, walltime=None, dataformats='NCHW')
     '''
 
     #  writer.close()  需在最后关闭
     return writer
+def write_csv(rst: list, file_pth: str, overwrite=False):
+    '''
+    :param rst:形如[('val1', val2),...,('valn', valn)]的列表
+    :param file_pth:输出csv的路径
+    :return:
+    '''
+    mode = 'w+' if overwrite else 'a+'
+    file = open(file_pth, mode, encoding='utf-8', newline='')
+
+    csv_writer = csv.writer(file)
+
+    csv_writer.writerows(rst)
+
+    file.close()

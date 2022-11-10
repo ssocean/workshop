@@ -171,26 +171,7 @@ def find_cnt_center(cnt):
     cX = int(M["m10"] / M["m00"])
     cY = int(M["m01"] / M["m00"])
     return (cX,cY)
-def get_white_ratio_cuda(bbox:np.ndarray):
-    '''
-    输入图像应为单通道，cuda加速版本
-    针对黑底白字
-    '''
-    if len(bbox.shape)>2:
-        #三通道 转灰度图
-        bbox_gray = cv2.cvtColor(bbox,cv2.COLOR_BGR2GRAY)
-    else:
-        bbox_gray = bbox
 
-    _,bbox_bin = cv2.threshold(bbox_gray,1,255,cv2.THRESH_BINARY)
-    bbox_tensor = ndarray_to_tensor(bbox_bin)
-    # bbox_bin.astype(np.uint16)
-    h,w = bbox_tensor.shape[:2]
-
-    bbox_tensor = bbox_tensor/255
-    # current_val = np.sum(bbox_bin)
-    ratio = bbox_tensor.sum()/(h*w) #
-    return ratio
 def extract_roi_by_cnt(img_ori,point):
     img = img_ori.copy()
     poly = np.array(point).astype(np.int32).reshape((-1))
@@ -221,10 +202,6 @@ def get_hor_projection(img_bin):
     return rst.tolist()
 # is_bin_bg_white(r'F:\Data\GJJS-dataset\dataset\train\image-bin\image_21.jpg')
 # a = is_color(r'F:\Data\GJJS-dataset\dataset\train\image\image_46.jpg')
-def points_to_poly(points):
-    poly = np.array(points).astype(np.int32).reshape((-1))
-    poly = poly.reshape(-1, 2)
-    return [poly.reshape((-1, 1, 2))]
 # print(a)
 # # labelme_to_dataset(r'D:\hongpu\json',r'D:\hongpu\mask')
 def crop_by_hor_projection(hor_projection,threshold):
@@ -384,3 +361,52 @@ def dir_to_1bit_bin(dir,output_dir):
         img = Image.fromarray(bin)
         new_name = get_filename_from_pth(pth, False)
         img.save(os.path.join(output_dir, new_name+'.png'), bits=1, optimize=True)
+        
+def get_white_ratio(bbox:np.ndarray):
+    '''
+    针对黑底白字
+    '''
+    if len(bbox.shape)>2:
+        #三通道 转灰度图
+        bbox_gray = cv2.cvtColor(bbox,cv2.COLOR_BGR2GRAY)
+    else:
+        bbox_gray = bbox
+    
+    _,bbox_bin = cv2.threshold(bbox_gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    bbox_bin.astype(np.uint16)
+    h,w = bbox_bin.shape[:2]
+
+    bbox_bin = bbox_bin/255
+    current_val = np.sum(bbox_bin)
+    ratio = current_val/(h*w) #
+    return ratio
+def cv2_chinese_text(img, text, position, textColor=(0, 0, 255), textSize=30):
+    if text is None:
+        return img
+    if (isinstance(img, np.ndarray)):  # 判断是否OpenCV图片类型
+        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    # 创建一个可以在给定图像上绘图的对象
+    draw = ImageDraw.Draw(img)
+    # 字体的格式
+    fontStyle = ImageFont.truetype(".ttc", textSize, encoding="utf-8")
+    # 绘制文本
+    draw.text(position, text, textColor, font=fontStyle,direction='ttb')
+    # 转换回OpenCV格式
+    return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+def points_to_poly(points):
+    poly = np.array(points).astype(np.int32).reshape((-1))
+    poly = poly.reshape(-1, 2)
+    return [poly.reshape((-1, 1, 2))]
+def resize_contour(cnts,ori_size,rst_shape):
+        '''
+        原地操作函数，由于原图尺寸的变换将会导致标注信息的变换，该方法完成在图片尺寸变换时标注信息的同步转换。
+        最好由低分辨率放大至高分辨率
+        :return:
+        '''
+        o_h, o_w = ori_size
+        r_h, r_w= rst_shape
+        height_ratio = r_h / o_h
+        width_ratio = r_w / o_w  # 计算出高度、宽度的放缩比例
+        ratio_mat = [[width_ratio,0],[0,height_ratio]]
+        # print(points_to_poly(cnts).shape)
+        return (np.array(cnts).astype(np.int32).reshape((-1)).reshape((-1,  2))@ratio_mat).astype(np.int32) # n×2 矩阵乘 2×2
