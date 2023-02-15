@@ -10,8 +10,7 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from GeneralTools.FileOperator import auto_make_directory
-
+from GeneralTools.FileOperator import auto_make_directory, write_csv
 
 def init_logger(out_pth: str = 'logs'):
     '''
@@ -26,7 +25,7 @@ def init_logger(out_pth: str = 'logs'):
     handler = logging.FileHandler(fr'{out_pth}/{time.strftime("%Y_%b_%d", time.localtime())}_log.txt')
 
     handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s # %(message)s')
     handler.setFormatter(formatter)
     # 输出到控制台
     console = logging.StreamHandler()
@@ -39,16 +38,39 @@ def init_logger(out_pth: str = 'logs'):
     logger.info("Start print log") #一般信息
     logger.debug("Do something") #调试显示
     logger.warning("Something maybe fail.")#警告
-    logger.info("Finish")
+    logger.info("'key':'value'")
     '''
     return logger
 
-def logger_to_excel():
+def extract_info_from_logs(log_pth:str,out_pth:str,*args):
     '''
-    将符合格式的logger文件转为excel
+    
     :return:
     '''
-    pass
+    import json
+    rst_lst = []
+    with open(log_pth, 'r', encoding='utf-8') as file:
+        log_lines = file.readlines()
+        append_lst = []
+        for log_line in log_lines:
+            # print(log_line)
+            extracted_dct = json.loads(log_line)
+            
+            # print(dct)
+            for key in args:
+                append_lst.append(extracted_dct[key])
+                # append_dct.update({key:})
+            rst_lst.append(append_lst)
+            append_lst = []
+            
+    write_csv(rst_lst,out_pth)
+    print(rst_lst)
+    return rst_lst
+            
+
+# 'epoch','train_loss','test_acc1')
+# 'epoch','train_loss','train_loss_main','train_loss_align')
+extract_info_from_logs(r'C:\Users\Ocean\Desktop\CAE-logs\0211-COM-SAE.txt',r'C:\Users\Ocean\Desktop\CAE-logs\0211-COM-SAE.csv','epoch','train_loss','train_loss_main','train_loss_align')
 
 def init_tensorboard(out_dir: str = 'logs'):
     if not os.path.exists(out_dir):  ##目录存在，返回为真
