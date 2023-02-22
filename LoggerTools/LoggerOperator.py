@@ -70,7 +70,7 @@ def extract_info_from_logs(log_pth:str,out_pth:str,*args):
 
 # 'epoch','train_loss','test_acc1')
 # 'epoch','train_loss','train_loss_main','train_loss_align')
-extract_info_from_logs(r'C:\Users\Ocean\Desktop\CAE-logs\0211-COM-SAE.txt',r'C:\Users\Ocean\Desktop\CAE-logs\0211-COM-SAE.csv','epoch','train_loss','train_loss_main','train_loss_align')
+extract_info_from_logs(r'C:\Users\Ocean\Desktop\CAE-logs\0220-COM-NAIVE.txt',r'C:\Users\Ocean\Desktop\CAE-logs\0220-COM-NAIVE.csv','epoch','train_loss','train_loss_main','train_loss_align')
 
 def init_tensorboard(out_dir: str = 'logs'):
     if not os.path.exists(out_dir):  ##目录存在，返回为真
