@@ -2,6 +2,7 @@ import csv
 import glob
 import logging
 import os
+import argparse
 import time
 from os.path import splitext
 from tqdm import tqdm
@@ -256,3 +257,26 @@ class MetricLogger(object):
         total_time_str = str(datetime.timedelta(seconds=int(total_time)))
         print('{} Total time: {} ({:.4f} s / it)'.format(
             header, total_time_str, total_time / len(iterable)))
+        
+        
+
+import json
+def parser_persistance(saved_dir,parse_args:argparse.Namespace,):
+# 将Namespace对象转换为JSON字符串
+    json_string = json.dumps(vars(parse_args))
+
+    # 将JSON字符串写入文件
+    with open(os.path.join(saved_dir,'saved_args.txt'), 'w') as file:
+        file.write(json_string)
+        
+def parser_loader(file_pth):
+    # 从文件中读取JSON字符串
+    with open(file_pth, 'r') as file:
+        json_string = file.read()
+
+    # 将JSON字符串转换回Namespace对象
+    args_dict = json.loads(json_string)
+    args = argparse.Namespace(**args_dict)
+
+    # 输出Namespace对象
+    return args
