@@ -1,3 +1,7 @@
+import sys
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 import csv
 import glob
 import logging
@@ -6,14 +10,13 @@ import argparse
 import time
 from os.path import splitext
 from tqdm import tqdm
-import sys
-import os
-from torch.utils.tensorboard import SummaryWriter
-from GeneralTools.Distributed import is_dist_avail_and_initialized
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-from GeneralTools.FileOperator import auto_make_directory, write_csv
 
+import json
+
+from torch.utils.tensorboard import SummaryWriter
+
+from GeneralTools.FileOperator import auto_make_directory, write_csv
+from GeneralTools.Distributed import is_dist_avail_and_initialized
 def init_logger(out_pth: str = 'logs'):
     '''
     初始化日志类
@@ -72,7 +75,7 @@ def extract_info_from_logs(log_pth:str,out_pth:str,*args):
 
 # 'epoch','train_loss','test_acc1')
 # 'epoch','train_loss','train_loss_main','train_loss_align')
-# extract_info_from_logs(r'C:\Users\Ocean\Desktop\CAE-logs\0220-COM-NAIVE.txt',r'C:\Users\Ocean\Desktop\CAE-logs\0220-COM-NAIVE.csv','epoch','train_loss','train_loss_main','train_loss_align')
+# extract_info_from_logs(r'C:\Users\Ocean\Desktop\extract.txt',r'C:\Users\Ocean\Desktop\MAE.csv','epoch','test_acc1')
 
 def init_tensorboard(out_dir: str = 'logs'):
     if not os.path.exists(out_dir):  ##目录存在，返回为真
@@ -260,7 +263,7 @@ class MetricLogger(object):
         
         
 
-import json
+
 def parser_persistance(saved_dir,parse_args:argparse.Namespace,):
 # 将Namespace对象转换为JSON字符串
     json_string = json.dumps(vars(parse_args))
