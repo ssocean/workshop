@@ -8,12 +8,13 @@ def get_param_value_dict(model):
     """
     param_group_names = {}
     param_groups = {}
-
+    values = []
     for name, param in model.named_parameters():
         # param_groups.update({name:[torch.norm(param,p=1).item(),torch.norm(param,p=2).item(),torch.norm(param,p=float('inf')).item()]})
         # print(name)
-        if name.startswith("block") and name.endswith('.weight'):
+        if name.startswith("block") and name.endswith('.attn.qkv.weight'):
             param_groups.update({name: torch.norm(param, p=2).item()})
+            values.append(torch.norm(param, p=2).item())
         # print(torch.norm(param,p=1).item())
         # print(torch.norm(param,p=2).item())
         # print(torch.norm(param,p=float('inf')).item())
@@ -23,7 +24,7 @@ def get_param_value_dict(model):
 
     # print("parameter groups: \n%s" % json.dumps(param_group_names, indent=2))
 
-    return param_groups
+    return param_groups,values
 
 
 from functools import partial
@@ -89,25 +90,37 @@ def load_model(model, weights_pth):
     return model
 
 
-weights_pth = r"C:\Users\Ocean\Downloads\mae_finetuned_vit_base.pth"
-weights2_pth = r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base_full-wdd80.pth"
-weights3_pth = r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base.pth"
-model = VisionTransformer(
-    patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6))
-msg = load_model(model,weights_pth)
-model_2 = VisionTransformer(
-    patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6))
-msg = load_model(model_2,weights2_pth)
-model_3 = VisionTransformer(
-    patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6))
-msg = load_model(model_3,weights3_pth)
+# weights1_pth = r"C:\Users\Ocean\Downloads\mae_finetuned_vit_base.pth"
+# weights2_pth = r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base_full-wdd80.pth"
+# weights3_pth = r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base.pth"
+pths = [r"C:\Users\Ocean\Downloads\mae_finetuned_vit_base.pth",r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base_full-wdd80.pth",r"C:\Users\Ocean\Downloads\mae_pretrain_vit_base.pth"]
+for pth in pths:
+    model = VisionTransformer(
+        patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
+        norm_layer=partial(nn.LayerNorm, eps=1e-6))
+    msg = load_model(model, pth)
+    p, v = get_param_value_dict(model)
+    print(p)
+    print(v)
+# model = VisionTransformer(
+#     patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
+#     norm_layer=partial(nn.LayerNorm, eps=1e-6))
+# msg = load_model(model,weights_pth)
+# model_2 = VisionTransformer(
+#     patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
+#     norm_layer=partial(nn.LayerNorm, eps=1e-6))
+# msg = load_model(model_2,weights2_pth)
+# model_3 = VisionTransformer(
+#     patch_size=16, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4, qkv_bias=True,
+#     norm_layer=partial(nn.LayerNorm, eps=1e-6))
+# msg = load_model(model_3,weights3_pth)
 # print(msg)
-p = get_param_value_dict(model)
-print(p)
-p = get_param_value_dict(model_2)
-print(p)
-p = get_param_value_dict(model_3)
-print(p)
+# p,v = get_param_value_dict(model)
+# print(p)
+# print(v)
+# p,v = get_param_value_dict(model_2)
+# print(p)
+# print(v)
+# p,v = get_param_value_dict(model_3)
+# print(p)
+# print(v)
