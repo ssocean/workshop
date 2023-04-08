@@ -75,7 +75,11 @@ def extract_info_from_logs(log_pth:str,out_pth:str,*args):
 
 # 'epoch','train_loss','test_acc1')
 # 'epoch','train_loss','train_loss_main','train_loss_align')
+<<<<<<< Updated upstream
 extract_info_from_logs(r'C:\Users\Ocean\Desktop\extract.txt',r'C:\Users\Ocean\Desktop\PAE.csv','epoch','test_acc1')
+=======
+extract_info_from_logs(r'C:\Users\Ocean\Desktop\extract.txt',r'C:\Users\Ocean\Desktop\MAE.csv','epoch','test_acc1')
+>>>>>>> Stashed changes
 
 def init_tensorboard(out_dir: str = 'logs'):
     if not os.path.exists(out_dir):  ##目录存在，返回为真
