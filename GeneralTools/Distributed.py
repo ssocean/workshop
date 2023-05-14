@@ -88,3 +88,50 @@ def init_distributed_mode(args):
                                          world_size=args.world_size, rank=args.rank)
     torch.distributed.barrier()
     setup_for_distributed(args.rank == 0)
+    
+import os
+import signal
+import subprocess
+import time
+import torch
+import pynvml
+import time
+def exec_when_idle(script_path,interval=60):
+    def signal_handler(signal, frame):
+        print("Keyboard interrupt detected. Stopping script...")
+        subprocess.call(["pkill", "-f", "python"])
+        exit(0)
+    signal.signal(signal.SIGINT, signal_handler)
+# 初始化pynvml模块
+    pynvml.nvmlInit()
+    # 设置时间间隔（单位：秒）
+    all_idle = False
+    while not all_idle:
+        idle_lst = []
+        for i in range(pynvml.nvmlDeviceGetCount()):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            util_info = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            meminfo = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            if util_info.gpu < 20 and (meminfo.used / 1024 / 1024)<500:
+                idle_lst.append(True)
+            else:
+                idle_lst.append(False)
+        all_idle = all(idle_lst)
+        if all_idle:
+            print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - All GPUs are idle. Start Training!")
+            break
+        else:
+            print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Some GPUs are being used. Keep wating...")
+        # 等待一段时间后再查询GPU状态
+        time.sleep(interval)
+    
+    # 使用 subprocess.run() 函数执行脚本
+    result = subprocess.run(script_path, shell=True, check=True)
+    return result
+
+
+
+
+
+
+
